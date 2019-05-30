@@ -1,0 +1,28 @@
+html {
+  height: cover;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'PT Sans', sans-serif;
+
+  height: 100%;
+  display: block;
+  position: relative;
+}
+
+body::after {
+  content: '';
+  background: url('https://images.pexels.com/photos/983296/pexels-photo-983296.jpeg?cs=srgb&dl=blur-bread-burger-983296.jpg&fm=jpg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  opacity: 0.1;
+  position: absolute;
+  z-index: -1;
+}
