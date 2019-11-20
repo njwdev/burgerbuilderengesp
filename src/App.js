@@ -1,6 +1,6 @@
 import React, { useEffect, Suspense, lazy } from 'react';
 import Layout from './hoc/Layout/Layout';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
 import { Route, withRouter, Switch, Redirect } from 'react-router-dom';
@@ -21,9 +21,15 @@ const Auth = lazy(() => {
 });
 
 const app = props => {
+  const { initialize } = props;
+  const dispatch = useDispatch();
+
+  const isAuthenticated = useSelector(state => state.auth.token !== null);
+
   useEffect(() => {
-    props.onTryAutoSignup();
-    props.initialize({
+    const onTryAutoSignup = () => dispatch(actions.authCheckState());
+    onTryAutoSignup();
+    initialize({
       languages: [
         { name: '🇬🇧', code: 'en' },
         { name: '🇪🇸', code: 'es' },
@@ -36,19 +42,19 @@ const app = props => {
   let routes = (
     <Switch>
       <Route path="/auth" render={props => <Auth {...props} />} />
-      <Route path="/" exact component={BurgerBuilder} />
+      <Route path="/" exact render={props => <BurgerBuilder {...props} />} />
       <Redirect to="/" />
     </Switch>
   );
 
-  if (props.isAuthenticated) {
+  if (isAuthenticated) {
     routes = (
       <Switch>
         <Route path="/checkout" render={props => <Checkout {...props} />} />
         <Route path="/orders" render={props => <Orders {...props} />} />
-        <Route path="/logout" component={Logout} />
+        <Route path="/logout" render={props => <Logout {...props} />} />
         <Route path="/auth" render={props => <Auth {...props} />} />
-        <Route path="/" exact component={BurgerBuilder} />
+        <Route path="/" exact render={props => <BurgerBuilder {...props} />} />
         <Redirect to="/" />
       </Switch>
     );
@@ -62,18 +68,4 @@ const app = props => {
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    isAuthenticated: state.auth.token !== null,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    onTryAutoSignup: () => dispatch(actions.authCheckState()),
-  };
-};
-
-export default withLocalize(
-  withRouter(connect(mapStateToProps, mapDispatchToProps)(app)),
-);
+export default withLocalize(withRouter(app));
