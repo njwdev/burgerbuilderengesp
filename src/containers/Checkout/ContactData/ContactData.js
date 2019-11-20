@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Button from '../../../components/UI/Button/Button';
 import classes from './ContactData.css';
 import Spinner from '../../../components/UI/Spinner/Spinner';
@@ -95,6 +95,19 @@ const contactData = props => {
   });
   const [formIsValid, setFormIsValid] = useState(false);
 
+  //dispatch
+  const dispatch = useDispatch();
+  const onOrderBurger = (orderData, token) =>
+    dispatch(actions.purchaseBurger(orderData, token));
+
+  //redux state
+
+  const ings = useSelector(state => state.burgerBuilder.ingredients);
+  const price = useSelector(state => state.burgerBuilder.totalPrice);
+  const loading = useSelector(state => state.order.loading);
+  const token = useSelector(state => state.auth.token);
+  const userId = useSelector(state => state.auth.userId);
+
   const orderHandler = event => {
     event.preventDefault();
     const formData = {};
@@ -102,13 +115,13 @@ const contactData = props => {
       formData[formElementIdentifier] = orderForm[formElementIdentifier].value;
     }
     const order = {
-      ingredients: props.ings,
-      price: props.price,
+      ingredients: ings,
+      price: price,
       orderData: formData,
-      userId: props.userId,
+      userId: userId,
     };
 
-    props.onOrderBurger(order, props.token);
+    onOrderBurger(order, token);
   };
 
   const inputChangedHandler = (event, inputIdentifier) => {
@@ -162,7 +175,7 @@ const contactData = props => {
       </Button>
     </form>
   );
-  if (props.loading) {
+  if (loading) {
     form = <Spinner />;
   }
   return (
@@ -175,23 +188,4 @@ const contactData = props => {
   );
 };
 
-const mapStateToProps = state => {
-  return {
-    ings: state.burgerBuilder.ingredients,
-    price: state.burgerBuilder.totalPrice,
-    loading: state.order.loading,
-    token: state.auth.token,
-    userId: state.auth.userId,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    onOrderBurger: (orderData, token) =>
-      dispatch(actions.purchaseBurger(orderData, token)),
-  };
-};
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(withErrorHandler(contactData, axios));
+export default withErrorHandler(contactData, axios);
